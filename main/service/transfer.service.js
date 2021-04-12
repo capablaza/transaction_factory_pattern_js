@@ -1,5 +1,7 @@
 import ApiClient from "./api.client";
 import ApiClientRequest from "./api.client.request";
+import BCIClient from "./bci.client";
+import SantanderClient from "./santader.client";
 import TransferResponse from "./transfer.response";
 
 export default class TransferService {
@@ -8,14 +10,15 @@ export default class TransferService {
   }
 
   transfer(opOrigin, opDestiny) {
-    let client = new ApiClient();
+    let clientOrigin = new SantanderClient();
+    let clientDestiny = new BCIClient();
 
-    let originResponse = client.verifyAccount(opOrigin);
-    let destinyResponse = client.verifyAccount(opDestiny);
+    let originResponse = clientOrigin.verifyAccount(opOrigin);
+    let destinyResponse = clientDestiny.verifyAccount(opDestiny);
 
     if (originResponse && destinyResponse) {
       let clientRequest = new ApiClientRequest(opOrigin, opDestiny);
-      let responseApi = client.send(clientRequest);
+      let responseApi = clientOrigin.send(clientRequest);
 
       this.storage.save(responseApi.message);
 
