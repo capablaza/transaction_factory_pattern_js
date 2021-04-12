@@ -1,7 +1,6 @@
-import ApiClient from "./api.client";
 import ApiClientRequest from "./api.client.request";
-import BCIClient from "./bci.client";
-import SantanderClient from "./santader.client";
+import ClientError from "./client.error";
+import ClientFactory from "./client.factory";
 import TransferResponse from "./transfer.response";
 
 export default class TransferService {
@@ -10,20 +9,25 @@ export default class TransferService {
   }
 
   transfer(opOrigin, opDestiny) {
-    let clientOrigin = new SantanderClient();
-    let clientDestiny = new BCIClient();
+    try {
+      let factory = new ClientFactory();
+      let clientOrigin = factory.build(opOrigin.bank);
+      let clientDestiny = factory.build(opDestiny.bank);
 
-    let originResponse = clientOrigin.verifyAccount(opOrigin);
-    let destinyResponse = clientDestiny.verifyAccount(opDestiny);
+      let originResponse = clientOrigin.verifyAccount(opOrigin);
+      let destinyResponse = clientDestiny.verifyAccount(opDestiny);
 
-    if (originResponse && destinyResponse) {
-      let clientRequest = new ApiClientRequest(opOrigin, opDestiny);
-      let responseApi = clientOrigin.send(clientRequest);
+      if (originResponse && destinyResponse) {
+        let clientRequest = new ApiClientRequest(opOrigin, opDestiny);
+        let responseApi = clientOrigin.send(clientRequest);
 
-      this.storage.save(responseApi.message);
+        this.storage.save(responseApi.message);
 
-      return new TransferResponse(responseApi.code, responseApi.message);
+        return new TransferResponse(responseApi.code, responseApi.message);
+      }
+      return new TransferResponse(501, "The accounts aren't corrects");
+    } catch (ex) {
+      return new TransferResponse(509, "Bank not found");
     }
-    return new TransferResponse(501, "The accounts aren't corrects");
   }
 }

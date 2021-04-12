@@ -1,3 +1,4 @@
+import ClientFactory from "../../main/service/client.factory";
 import Operation from "../../main/service/operation";
 import TransferService from "../../main/service/transfer.service";
 import StorageDummy from "./storage.dummy";
@@ -23,5 +24,5 @@ test("shouldReturn501WhenOriginOrDestinyIsNotCorrect", () => {
 
   let response = service.transfer(opOrigin, opDestiny);
 
-  expect(response.code).toBe(501);
+  expect(response.code).toBe(509);
 });
